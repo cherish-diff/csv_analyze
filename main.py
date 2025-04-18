@@ -3,6 +3,13 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 
+st.set_page_config(
+    page_title="Data Visualization App",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state = "collapsed"
+)
+
 # state init
 st.session_state.df = pd.DataFrame()
 st.session_state.header_list = []
