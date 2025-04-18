@@ -12,8 +12,18 @@ st.session_state.line_chart_data = defaultdict(list)
 st.subheader("Upload CSV | Visualize | Analyze")
 def load_df():
     if not st.session_state.df.empty:
-        st.dataframe(st.session_state.df, height=250, use_container_width=True)
         st.session_state.header_list = [key for key, val in st.session_state.df.dtypes.to_dict().items() if val in ['int64', 'float64']]
+        with st.expander("Data Info", expanded=True):
+            info_tab, desc_tab = st.tabs(["Info", "Description"])
+            with info_tab:
+                st.write("Data Types")
+                st.dataframe(st.session_state.df.dtypes, height=150)
+                st.write("Shape")
+                st.write(f"Total Rows : {st.session_state.df.shape[0]} | Total Columns : {st.session_state.df.shape[1]}")
+            
+            with desc_tab:
+                st.write("Data Description")
+                st.dataframe(st.session_state.df.describe(), height=150)
 
 col1, col2 = st.columns(2)
 with col1:
@@ -23,8 +33,7 @@ with col1:
         st.session_state.df = df
 
 with col2:
-    if 'df' in st.session_state:
-        load_df()
+    load_df()
         
 # ================= edit section =====================
 
@@ -40,8 +49,9 @@ with edit_section:
 
 
 def create_bar():
-    selected_x = st.selectbox("Select Base Column", st.session_state.df.columns, key="bar_x")
-    selected_y = st.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="bar_y")
+    c1, c2 = st.columns([1,2])
+    selected_x = c1.selectbox("Select Base Column", st.session_state.df.columns, key="bar_x")
+    selected_y = c2.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="bar_y")
     if selected_x and selected_y:
         chart_data = st.session_state.df.groupby(selected_x)[selected_y].mean().reset_index()
         st.bar_chart(
@@ -50,8 +60,9 @@ def create_bar():
             y=selected_y, height=250)
         
 def create_line():
-    selected_x = st.selectbox("Select Base Column", st.session_state.df.columns, key="line_x")
-    selected_y = st.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="line_y")
+    c1, c2 = st.columns([1,2])
+    selected_x = c1.selectbox("Select Base Column", st.session_state.df.columns, key="line_x")
+    selected_y = c2.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="line_y")
     if selected_x and selected_y:
         chart_data = st.session_state.df.groupby(selected_x)[selected_y].mean().reset_index()
         st.line_chart(
