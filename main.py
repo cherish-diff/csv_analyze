@@ -9,7 +9,7 @@ st.session_state.header_list = []
 st.session_state.line_chart_data = defaultdict(list)
 
 
-st.write("Data visualization | Upload CSV and Visualize | Simple")
+st.subheader("Upload CSV | Visualize | Analyze")
 def load_df():
     if not st.session_state.df.empty:
         st.dataframe(st.session_state.df, height=250, use_container_width=True)
@@ -22,13 +22,22 @@ with col1:
         df = pd.read_csv(uploaded_file, index_col=False)
         st.session_state.df = df
 
-    
-    
-
 with col2:
     if 'df' in st.session_state:
         load_df()
         
+# ================= edit section =====================
+
+edit_section = st.expander("Edit Section", expanded=False)
+with edit_section:
+    st.subheader("Edit Data")
+    st.session_state.df = st.data_editor(
+        st.session_state.df,
+        num_rows="dynamic",
+        use_container_width=True,
+        key="edit_data",
+    )
+
 
 def create_bar():
     selected_x = st.selectbox("Select Base Column", st.session_state.df.columns, key="bar_x")
@@ -61,6 +70,15 @@ with st.container(border=True):
 
     with tab_line:
         create_line()
+
+
+with st.sidebar:
+    st.subheader("Data Analysis")
+    st.write("This is a simple data visualization app that allows you to upload a CSV file and visualize the data using bar and line charts.")
+    st.write("You can select the columns you want to visualize and the app will generate the charts for you.")
+    st.write("This app is built using Streamlit, a Python library for building web apps.")
+    st.write("You can use this app to quickly visualize your data and gain insights from it.")
+    st.write(" Relex We are not storing any data.")
 
 
 
