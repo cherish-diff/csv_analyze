@@ -22,20 +22,46 @@ with col1:
         df = pd.read_csv(uploaded_file, index_col=False)
         st.session_state.df = df
 
-    if 'df' in st.session_state:
-        load_df()
+    
     
 
 with col2:
-    with st.container(border=True):
-       st.session_state.line_chart_data['x_selected_col'] = st.selectbox("Select Base Column", st.session_state.df.columns)
-       st.session_state.line_chart_data['y_selected_cols'] = st.multiselect("Columns For Line Chart", st.session_state.header_list, default=[])
-    
-       
-    if st.session_state.line_chart_data['y_selected_cols'] and st.session_state.line_chart_data['x_selected_col']:
-        # x wise y avrage
-        chart_data = st.session_state.df.groupby(st.session_state.line_chart_data['x_selected_col'])[st.session_state.line_chart_data['y_selected_cols']].mean().reset_index()
+    if 'df' in st.session_state:
+        load_df()
+        
+
+def create_bar():
+    selected_x = st.selectbox("Select Base Column", st.session_state.df.columns, key="bar_x")
+    selected_y = st.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="bar_y")
+    if selected_x and selected_y:
+        chart_data = st.session_state.df.groupby(selected_x)[selected_y].mean().reset_index()
+        st.bar_chart(
+            chart_data,
+            x=selected_x,
+            y=selected_y, height=250)
+        
+def create_line():
+    selected_x = st.selectbox("Select Base Column", st.session_state.df.columns, key="line_x")
+    selected_y = st.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="line_y")
+    if selected_x and selected_y:
+        chart_data = st.session_state.df.groupby(selected_x)[selected_y].mean().reset_index()
         st.line_chart(
             chart_data,
-            x=st.session_state.line_chart_data['x_selected_col'],
-            y=st.session_state.line_chart_data['y_selected_cols'], height=250)
+            x=selected_x,
+            y=selected_y, height=250)
+        
+
+with st.container(border=True):
+    st.subheader("Analyze | Visualize | Predict")
+
+    tab_bar, tab_line = st.tabs(["Bar Chart", "Line Chart"])
+
+    with tab_bar:
+        create_bar()
+
+    with tab_line:
+        create_line()
+
+
+
+
