@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+from datetime import datetime, timedelta
 
+from streamlit_date_picker import date_range_picker, date_picker, PickerType
 st.set_page_config(
     page_title="Data Visualization App",
     page_icon="📊",
@@ -67,9 +69,27 @@ def create_bar():
             y=selected_y, height=250)
         
 def create_line():
-    c1, c2 = st.columns([1,2])
+    c1, c2, c3 = st.columns([1,2,1])
     selected_x = c1.selectbox("Select Base Column", st.session_state.df.columns, key="line_x")
     selected_y = c2.multiselect("Columns For Bar Chart", st.session_state.header_list, default=[], key="line_y")
+    if selected_x:
+        with c3:
+            try:
+                st.session_state.df['date_obj'] = pd.to_datetime(st.session_state.df[selected_x]).dt.date
+                if len(st.session_state.df['date_obj'].unique().tolist()) <= 1:
+                    raise Exception("Date column has only one unique value")
+                start_x = st.session_state.df['date_obj'].min()
+                end_x = st.session_state.df['date_obj'].max()
+                ic1, ic2 = st.columns(2)
+                x_filter_start = ic1.date_input("Select Start Date", value=start_x, key="line_x_filter")
+                x_filter_end = ic2.date_input("Select End Date", value=end_x, key="line_x_filter_end")
+                st.session_state.df = st.session_state.df[(st.session_state.df['date_obj'] >= x_filter_start) & (st.session_state.df['date_obj'] <= x_filter_end)]
+                st.session_state.df = st.session_state.df.drop(columns=['date_obj'])
+            except Exception as e:
+                values = st.session_state.df[selected_x].unique()
+                values.sort()
+                selected = c3.multiselect("Select values for filter", values, default=values[-5:], key="line_x_date",)
+                st.session_state.df = st.session_state.df[st.session_state.df[selected_x].isin(selected)]
     if selected_x and selected_y:
         chart_data = st.session_state.df.groupby(selected_x)[selected_y].mean().reset_index()
         st.line_chart(
